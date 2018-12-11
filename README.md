@@ -53,3 +53,7 @@ project-mail 172.18.0.2
 ```bash
 composer require kba-team/dockertools --dev
 ```
+
+## Environment variables
+
+* `DOCKER_REGISTRY` Instead of using `busybox` to manipulate the hosts file, `${DOCKER_REGISTRY}/busybox` will be used. This is useful, in case you manually cache docker images in a local registry for faster access.

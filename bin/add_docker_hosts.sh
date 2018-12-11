@@ -25,6 +25,11 @@ function is_container_up() {
     return $?
 }
 
+# check if there is an environment variable that sets a different docker registry
+if [ -n "${DOCKER_REGISTRY}" ]; then
+    ROOT_CONTAINER="${DOCKER_REGISTRY}/${ROOT_CONTAINER}"
+fi
+
 # check if docker is installed
 if [ -z $(which docker) ]; then (>&2 echo "ERROR: This tool needs docker do be installed!"); exit 2; fi
 
