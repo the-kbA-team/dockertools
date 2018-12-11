@@ -18,6 +18,13 @@ function show_usage() {
     echo "Usage: add_docker_hosts.sh [-f <hosts-file>] -c <container-name> <host-name> [<host-name> [...]]"
 }
 
+# determine whether a container is up
+function is_container_up() {
+    CONTAINERUPREGEX=".*[[:space:]]Up[[:space:]].*[[:space:]]${1}\$"
+    docker ps | grep -E "${CONTAINERUPREGEX}" &> /dev/null
+    return $?
+}
+
 # check if docker is installed
 if [ -z $(which docker) ]; then (>&2 echo "ERROR: This tool needs docker do be installed!"); exit 2; fi
 
@@ -41,6 +48,7 @@ while [ "${1}" ]; do
         -c | --container )
             shift # parameter -c
             if [ -z "${1}" ]; then (>&2 echo "ERROR: container-name missing!"); show_usage; exit 1; fi
+            if ! is_container_up "${1}"; then (>&2 echo "ERROR: container ${1} not running!"); show_usage; exit 1; fi
             CONTAINERIP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${1}") || exit $?
             shift # parameter container-name
             ;;
