@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 ################################################################################
 # Docker tools                                                                 #
@@ -13,7 +13,7 @@ BUSYBOX="busybox:latest"
 set -e
 
 # display usage information
-function show_usage() {
+show_usage() {
     echo "Remove host names from ${HOSTSFILE}."
     echo "Usage: remove_docker_hosts.sh [-f <hosts-file>] <host-name> [<host-name> [...]]"
     echo "<host-name> may also be a regular expression."
