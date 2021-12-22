@@ -1,42 +1,35 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 ################################################################################
 # Docker tools                                                                 #
 # Add IPs of docker containers to your hosts file.                             #
 #                                                                              #
-# @author Gregor Joham <gregor.joham@knorr-bremse.com>                         #
+# @author Gregor J.                                                            #
 ################################################################################
 
 HOSTSFILE="/etc/hosts"
-CONTAINERIP=""
-ROOT_CONTAINER="busybox"
+BUSYBOX="busybox:latest"
+HOSTS_FORMAT='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{range .Aliases}} {{.}}{{end}}{{printf "\n"}}{{end}}'
 
 set -e
 
 # display usage information
-function show_usage() {
-    echo "Usage: add_docker_hosts.sh [-f <hosts-file>] -c <container-name> <host-name> [<host-name> [...]]"
-}
-
-# determine whether a container is up
-function is_container_up() {
-    CONTAINERUPREGEX=".*[[:space:]]Up[[:space:]].*[[:space:]]${1}\$"
-    docker ps | grep -E "${CONTAINERUPREGEX}" &> /dev/null
-    return $?
+show_usage() {
+    echo "Add the IPs and hostnames of all containers started by docker-compose to ${HOSTSFILE}."
+    echo
+    echo "Usage: add_docker_hosts.sh [-f <hosts-file>] [-c]"
 }
 
 # check if there is an environment variable that sets a different docker registry
 if [ -n "${DOCKER_REGISTRY}" ]; then
-    ROOT_CONTAINER="${DOCKER_REGISTRY}/${ROOT_CONTAINER}"
+    BUSYBOX="${DOCKER_REGISTRY}/${BUSYBOX}"
 fi
 
-# check if docker is installed
-if [ -z $(which docker) ]; then (>&2 echo "ERROR: This tool needs docker do be installed!"); exit 2; fi
+# check if docker and docker-compose are installed
+if ! type docker > /dev/null 2>&1; then (>&2 echo "ERROR: This tool needs docker do be installed!"); exit 2; fi
+if ! type docker-compose > /dev/null 2>&1; then (>&2 echo "ERROR: This tool needs docker-compose do be installed!"); exit 2; fi
 
-# check parameters
-if [ -z "${1}" ]; then (>&2 echo "ERROR: parameters missing!"); show_usage; exit 1; fi
-
-# loop through the parameters
+# loop through the options
 while [ "${1}" ]; do
     case "${1}" in
         -h | --help )
@@ -44,23 +37,39 @@ while [ "${1}" ]; do
             exit 1
             ;;
         -f | --file )
-            shift # parameter -f
+            shift # option -f
             if [ -z "${1}" ]; then (>&2 echo "ERROR: hosts-file missing!"); show_usage; exit 1; fi
             if [ ! -f "${1}" ]; then (>&2 echo "ERROR: hosts-file \"${1}\" does not exist!"); exit 1; fi
             HOSTSFILE="${1}"
-            shift # parameter hosts-file
+            shift # option parameter hosts-file
             ;;
-        -c | --container )
-            shift # parameter -c
-            if [ -z "${1}" ]; then (>&2 echo "ERROR: container-name missing!"); show_usage; exit 1; fi
-            if ! is_container_up "${1}"; then (>&2 echo "ERROR: container ${1} not running!"); show_usage; exit 1; fi
-            CONTAINERIP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "${1}") || exit $?
-            shift # parameter container-name
+        -r | --rm )
+            shift # option -r
+            ADD_HOSTS=0
             ;;
         * )
-            if [ -z "${CONTAINERIP}" ]; then (>&2 echo "ERROR: container-name missing!"); show_usage; exit 1; fi
-            docker run --rm --init -v "${HOSTSFILE}":/tmp/editfile -e CONTAINERIP=${CONTAINERIP} -e CONTAINERHOST=${1} ${ROOT_CONTAINER} sh -c 'echo "${CONTAINERIP} ${CONTAINERHOST}" | tee -a /tmp/editfile' || exit $?
-            shift # parameter host-name
+            (>&2 echo "ERROR: Unknown option '${1}'.")
+            exit 2
             ;;
     esac
 done
+
+# List all docker containers started by docker-compose
+docker-compose ps -q | while read -r container; do
+    # Remove all line(s) from the hosts file containing the hostname
+    docker run --rm \
+        -v "${HOSTSFILE}":/tmp/h \
+        --env HOST_NAME="$(docker inspect --format "{{.Config.Hostname}}" "${container}")" \
+        "${BUSYBOX}" sh -c 'echo "Removing ${HOST_NAME}"; sed -E "/.* ${HOST_NAME//\./\\.}/d" /tmp/h | awk "NF" > /tmp/g; cat /tmp/g > /tmp/h';
+done
+
+if [ "${ADD_HOSTS:-1}" = "1" ]; then
+    echo "==> Adding hostnames:"
+
+    # List all docker containers started by docker-compose
+    docker-compose ps -q | while read -r container; do
+        # Extract IP and hostnames from each container
+        docker inspect --format "${HOSTS_FORMAT}" "${container}";
+    # remove empty lines and append all lines to the hosts-file
+    done | awk "NF" | docker run --rm -i -v "${HOSTSFILE}":/tmp/h "${BUSYBOX}" tee -a /tmp/h
+fi

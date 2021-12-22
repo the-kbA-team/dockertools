@@ -1,12 +1,11 @@
 {
   "name": "kba-team/dockertools",
-  "description": "Useful tools when you are running your project inside docker containers.",
+  "description": "Scripts to remove and add all running docker containers in your /etc/hosts file.",
   "type": "tools",
   "minimum-stability": "stable",
   "license": "MIT",
   "bin": [
     "bin/add_docker_hosts.sh",
-    "bin/remove_docker_hosts.sh",
-    "bin/wait_for_container.sh"
+    "bin/remove_docker_hosts.sh"
   ]
 }

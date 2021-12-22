@@ -1,19 +1,19 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 ################################################################################
 # Docker tools                                                                 #
 # Remove host names from your hosts file.                                      #
 #                                                                              #
-# @author Gregor Joham <gregor.joham@knorr-bremse.com>                         #
+# @author Gregor J.                                                            #
 ################################################################################
 
 HOSTSFILE="/etc/hosts"
-ROOT_CONTAINER="busybox"
+BUSYBOX="busybox:latest"
 
 set -e
 
 # display usage information
-function show_usage() {
+show_usage() {
     echo "Remove host names from ${HOSTSFILE}."
     echo "Usage: remove_docker_hosts.sh [-f <hosts-file>] <host-name> [<host-name> [...]]"
     echo "<host-name> may also be a regular expression."
@@ -21,11 +21,11 @@ function show_usage() {
 
 # check if there is an environment variable that sets a different docker registry
 if [ -n "${DOCKER_REGISTRY}" ]; then
-    ROOT_CONTAINER="${DOCKER_REGISTRY}/${ROOT_CONTAINER}"
+    BUSYBOX="${DOCKER_REGISTRY}/${BUSYBOX}"
 fi
 
-# check if docker is installed
-if [ -z $(which docker) ]; then (>&2 echo "ERROR: This tool needs docker do be installed!"); exit 2; fi
+# check if docker and docker-compose are installed
+if ! type docker > /dev/null 2>&1; then (>&2 echo "ERROR: This tool needs docker do be installed!"); exit 2; fi
 
 # check parameters
 if [ -z "${1}" ]; then (>&2 echo "ERROR: parameters missing!"); show_usage; exit 1; fi
@@ -45,7 +45,7 @@ while [ "${1}" ]; do
             shift # parameter hosts-file
             ;;
         * )
-            docker run --rm --init -v "${HOSTSFILE}":/tmp/editfile -e CONTAINERHOST=${1} ${ROOT_CONTAINER} sh -c 'sed -E "/.*${CONTAINERHOST}/d" /tmp/editfile | awk "NF" > /tmp/editfile.tmp; cat /tmp/editfile.tmp > /tmp/editfile; rm -f /tmp/editfile.tmp' || exit $?
+            docker run --rm --init -v "${HOSTSFILE}":/tmp/h -e CONTAINERHOST="${1}" "${BUSYBOX}" sh -c 'sed -E "/.*${CONTAINERHOST}/d" /tmp/h | awk "NF" > /tmp/g; cat /tmp/g > /tmp/h' || exit $?
             shift # parameter host-name
             ;;
     esac
