@@ -2,7 +2,7 @@
 
 ################################################################################
 # Docker tools                                                                 #
-# Add IPs of docker containers to your hosts file.                             #
+# Add/remove IPs of docker containers to your hosts file.                      #
 #                                                                              #
 # @author Gregor J.                                                            #
 ################################################################################
@@ -17,7 +17,7 @@ set -e
 show_usage() {
     echo "Add the IPs and hostnames of all containers started by docker-compose to ${HOSTSFILE}."
     echo
-    echo "Usage: add_docker_hosts.sh [-f <hosts-file>] [-c]"
+    echo "Usage: docker_hosts.sh [-f <hosts-file>] [-r]"
 }
 
 # check if there is an environment variable that sets a different docker registry
