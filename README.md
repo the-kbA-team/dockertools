@@ -34,3 +34,40 @@ Usage: `add_docker_hosts.sh [-h] [-f <hosts-file>] [-r]`
 ### Environment variables
 
 * `DOCKER_REGISTRY` Instead of using `busybox:latest` to manipulate the hosts file, `${DOCKER_REGISTRY}/busybox` will be used. This is useful, in case you manually cache docker images in a local registry for faster access.
+
+## Automate docker-compose
+
+In order to automate commands that need execution _after_ docker-compose did its work, use `bin/docker.sh`.
+
+Usage: `setup/docker.sh <command>`
+
+Available commands are:
+
+ * `add-hosts` Add container hostnames and IPs to hosts file.
+ * `remove-hosts` Remove container hostnames and IPs from hosts file.
+ * `exec` Execute command(s) in docker container as `${DEFAULT_EXEC_USER:-www-data:www-data}`. Available options:
+   * `-u` | `--user` Run commands using user ID `$(id -u)` and group ID `$(id -g)`.
+   * `-c` | `--container <name>` Run commands in the specified container. Default container: `${DEFAULT_CONTAINER:-web}`
+ * `migrate` Run the migrations command `${MIGRATE_COMMAND}` inside the default container `${DEFAULT_CONTAINER:-web}`.
+ * `seed` Run the seed command `${MIGRATE_COMMAND}` inside the default container `${DEFAULT_CONTAINER:-web}`.
+ * `start` Try to pull the current versions of the images, start the containers and add hostnames and IPs to the hosts file.
+ * `up` Run start, migrate and seed commands.
+ * `stop` Remove container hostnames and IPs from hosts file and stop the docker containers without destroying them.
+ * `down` Remove container hostnames and IPs from hosts file and destroy the docker containers.
+ * `restart` Run down and up commands.
+ * `behat` Run behat tests. Any additional parameters will be added to the behat command.
+ * `phpunit` Run phpunit tests. Any additional parameters will be added to the phpunit command.
+ * `help` Show help.
+
+### Environment variables
+
+Configure the environment variables in your `.env` file. That way it can be used by docker-compose as well (DRY).
+
+* `DEFAULT_EXEC_USER` The default user executing commands inside docker containers.
+* `DEFAULT_CONTAINER` The default container to execute commands in.
+* `MIGRATE_COMMAND` The command running the migrations to set up the DB structure. In case this variable is not defined, nothing happens.
+* `SEED_COMMAND` The command adding seed data to your empty DB. In case this variable is not defined, nothing happens.
+* `PHPUNIT_BIN` The path to the PHPunit binary. In case this variable is not defined, nothing happens.
+* `BEHAT_BIN` The path to the Behat binary. In case this variable is not defined, nothing happens.
+
+[docker-compose]:https://docs.docker.com/compose/
