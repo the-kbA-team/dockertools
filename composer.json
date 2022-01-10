@@ -5,7 +5,6 @@
   "minimum-stability": "stable",
   "license": "MIT",
   "bin": [
-    "bin/add_docker_hosts.sh",
-    "bin/remove_docker_hosts.sh"
+    "bin/docker_hosts.sh"
   ]
 }
