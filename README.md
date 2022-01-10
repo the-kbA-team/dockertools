@@ -1,6 +1,10 @@
 # Docker tools
 
-Scripts to remove and add all running docker containers in your `/etc/hosts` file.
+[docker-compose] is a very useful tool, especially if you're programming inside a network of docker-containers. Accessing the (TCP) services of these docker containers, however is not so easy. To the best of my knowledge there are currently no tools available, that will add the IPs and hostnames of your running network to your hosts `/etc/hosts` file- until now.
+
+## Why not use <insert DNS/discovery service here>?
+
+Running a DNS service for docker containers always messes with the DNS settings of your workstation. Especially if these DNS/discovery services themselves run inside docker containers on an active development workstation. Resolving DNS issues is not an easy task. Contrary to that the `/etc/hosts` file is simple. It couldn't care less if your workstation switches domains, DNS services, VPNs, etc. on-the-fly. In case something goes wrong, you can always edit the file manually. _It was made for adding the hosts of a docker network_ (joke). I like the `/etc/hosts` file (not a joke).
 
 ## Add to your PHP project
 
@@ -22,22 +26,11 @@ Usage: `add_docker_hosts.sh [-h] [-f <hosts-file>] [-r]`
 * `-f <hosts-file>` Use a different hosts file than `/etc/hosts`.
 * `-r` Only remove all the hostnames of containers created by `docker-compose`, but do not add them.
 
-Examples:
+### Examples:
 
 * `vendor/bin/add_docker_hosts.sh`: Remove and then add all docker containers in the `/etc/hosts` file. 
 * `vendor/bin/add_docker_hosts.sh -r`: Just remove all docker containers from the `/etc/hosts` file.
 
-## Remove entries from hosts
-
-Manually remove the given host names from the `/etc/hosts` file. Instead of host names, you can also use regular expressions.
-
-Usage: `remove_docker_hosts.sh [-h] [-f <hosts-file>] <host-name> [<host-name> [...]]`
-
-* `-h` Display usage information.
-* `-f <hosts-file>` Use a different hosts file than `/etc/hosts`.
-
-Example: `vendor/bin/remove_docker_hosts.sh "(unit1|unit2|unit3)(\\-test|)\\.test" "project-(db|selenium|mail)\\.test"`
-
-## Environment variables
+### Environment variables
 
 * `DOCKER_REGISTRY` Instead of using `busybox:latest` to manipulate the hosts file, `${DOCKER_REGISTRY}/busybox` will be used. This is useful, in case you manually cache docker images in a local registry for faster access.
