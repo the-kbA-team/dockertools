@@ -69,7 +69,7 @@ DEFAULT_CONTAINER="${DEFAULT_CONTAINER:-web}"
 
 # Display usage information
 show_usage() {
-    echo "Usage: setup/docker.sh [command]"
+    echo "Usage: docker.sh [command]"
 }
 
 # Display command list
