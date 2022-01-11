@@ -20,7 +20,7 @@ The script first removes all existing entries of all the hostnames of containers
 
 It is implied, that this script can only be called while docker containers are running. 
 
-Usage: `add_docker_hosts.sh [-h] [-f <hosts-file>] [-r]`
+Usage: `docker_hosts.sh [-h] [-f <hosts-file>] [-r]`
 
 * `-h` Display usage information.
 * `-f <hosts-file>` Use a different hosts file than `/etc/hosts`.
@@ -28,8 +28,8 @@ Usage: `add_docker_hosts.sh [-h] [-f <hosts-file>] [-r]`
 
 ### Examples:
 
-* `vendor/bin/add_docker_hosts.sh`: Remove and then add all docker containers in the `/etc/hosts` file. 
-* `vendor/bin/add_docker_hosts.sh -r`: Just remove all docker containers from the `/etc/hosts` file.
+* `vendor/bin/docker_hosts.sh`: Remove and then add all docker containers in the `/etc/hosts` file. 
+* `vendor/bin/docker_hosts.sh -r`: Just remove all docker containers from the `/etc/hosts` file.
 
 ### Environment variables
 
@@ -39,7 +39,7 @@ Usage: `add_docker_hosts.sh [-h] [-f <hosts-file>] [-r]`
 
 In order to automate commands that need execution _after_ docker-compose did its work, use `bin/docker.sh`.
 
-Usage: `setup/docker.sh <command>`
+Usage: `vendor/bin/docker.sh <command>`
 
 Available commands are:
 
