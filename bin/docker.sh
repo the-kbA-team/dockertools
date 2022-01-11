@@ -60,6 +60,7 @@ if [ ! -f "${ROOT_DIR}/.env" ]; then
 fi
 
 # Load configuration
+# shellcheck disable=SC1091
 . "${ROOT_DIR}/.env"
 
 # Set defaults
