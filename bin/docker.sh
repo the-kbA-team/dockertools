@@ -79,7 +79,7 @@ show_commands() {
     echo " add-hosts      Add container hostnames and IPs to hosts file."
     echo " remove-hosts   Remove container hostnames and IPs from hosts file."
     echo " exec           Execute command(s) in docker container as '${DEFAULT_EXEC_USER}'."
-    echo "                Available options: "
+    echo "                Available options:"
     echo "                  -u | --user             Run commands using user ID '$(id -u)' and group ID '$(id -g)'."
     echo "                  -c | --container [name] Run commands in the specified container. Default container: ${DEFAULT_CONTAINER}"
     echo " migrate        Run the migrations command '${MIGRATE_COMMAND}' inside the default container '${DEFAULT_CONTAINER}'."
@@ -89,6 +89,9 @@ show_commands() {
     echo " stop           Remove container hostnames and IPs from hosts file and stop the docker containers without destroying them."
     echo " down           Remove container hostnames and IPs from hosts file and destroy the docker containers."
     echo " restart        Run down and up commands."
+    echo " cleanup        Delete files owned by '${DEFAULT_EXEC_USER}'."
+    echo "                Available options:"
+    echo "                  --root Delete files owned by 'root'."
     echo " behat          Run behat tests. Any additional parameters will be added to the behat command."
     echo " phpunit        Run phpunit tests. Any additional parameters will be added to the phpunit command."
     echo " help           Show this help."
@@ -162,6 +165,27 @@ while [ "${1}" ]; do
             echo_command "sleep 1"
             sleep 1
             "${SELF}" up
+            ;;
+        "cleanup")
+            if [ "${1}" = "--root" ]; then
+                shift
+                FIND_USER="root"
+            else
+                FIND_USER="${DEFAULT_EXEC_USER%%:*}"
+            fi
+            BUSYBOX="${BUSYBOX:-busybox:latest}"
+            [ -z "${DOCKER_REGISTRY}" ] || BUSYBOX="${DOCKER_REGISTRY}/${BUSYBOX}"
+            echo_command "docker pull ${BUSYBOX}"
+            docker pull "${BUSYBOX}"
+            echo_command "docker run --rm --init --tty --env FIND_USER=${FIND_USER} --volume ${ROOT_DIR}:/app --workdir /app ${BUSYBOX} find . -user ${FIND_USER} -delete"
+            docker run \
+                --rm \
+                --init \
+                --tty \
+                --volume "${ROOT_DIR}":/app \
+                --workdir /app \
+                "${BUSYBOX}" \
+                    find . -user "${FIND_USER}" -delete
             ;;
         "behat")
             if [ -f "${ROOT_DIR}/${BEHAT_BIN}" ]; then

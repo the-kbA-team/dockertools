@@ -55,13 +55,15 @@ Available commands are:
  * `stop` Remove container hostnames and IPs from hosts file and stop the docker containers without destroying them.
  * `down` Remove container hostnames and IPs from hosts file and destroy the docker containers.
  * `restart` Run down and up commands.
+ * `cleanup` Delete files owned by `${DEFAULT_EXEC_USER}`. Available options:
+   * `--root` Delete files owned by `root`.
  * `behat` Run behat tests. Any additional parameters will be added to the behat command.
  * `phpunit` Run phpunit tests. Any additional parameters will be added to the phpunit command.
  * `help` Show help.
 
 ### Environment variables
 
-Configure the environment variables in your `.env` file. That way it can be used by docker-compose as well (DRY).
+Configure the environment variables in your `.env` file. That way it can be used by docker-compose as well ([DRY]).
 
 * `DEFAULT_EXEC_USER` The default user executing commands inside docker containers.
 * `DEFAULT_CONTAINER` The default container to execute commands in.
@@ -71,3 +73,4 @@ Configure the environment variables in your `.env` file. That way it can be used
 * `BEHAT_BIN` The path to the Behat binary. In case this variable is not defined, nothing happens.
 
 [docker-compose]:https://docs.docker.com/compose/
+[DRY]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
