@@ -117,6 +117,7 @@ while [ "${1}" ]; do
                 EXEC_USER="${DEFAULT_EXEC_USER}"
             fi
             if [ "${1}" = "--container" ] || [ "${1}" = "-c" ]; then
+                shift
                 CONTAINER="${1}"
                 shift
             else
