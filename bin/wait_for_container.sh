@@ -14,24 +14,12 @@ function show_usage() {
     echo "Usage: wait_for_container.sh <container-name> \"<command that has to be successful>\""
 }
 
-##
-# Get the repository root directory from the current directory.
-##
-function get_repository_root() {
-  git rev-parse --show-toplevel 2> /dev/null
-  local E=$?
-  if [ ${E} -ne 0 ]; then
-      echo_error "ERROR while trying to get the repository root!"
-  fi
-  return ${E}
-}
-
 # check parameters
 if [ -z "${1}" ]; then (>&2 echo "ERROR: container name and command missing!"); show_usage; exit 1; fi
 if [ -z "${2}" ]; then (>&2 echo "ERROR: container command missing!"); show_usage; exit 1; fi
 
 # load possible environment variables
-BASEDIR=$(get_repository_root)
+BASEDIR=$(pwd)
 if [ -e "${BASEDIR}/.env" ]; then
     source "${BASEDIR}/.env";
 fi
