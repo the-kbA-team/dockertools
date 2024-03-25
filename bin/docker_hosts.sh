@@ -9,7 +9,8 @@
 
 HOSTSFILE="/etc/hosts"
 BUSYBOX="busybox:latest"
-HOSTS_FORMAT='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{range .Aliases}} {{.}}{{end}}{{printf "\n"}}{{end}}'
+HOSTS_FORMAT_ALIAS='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{range .Aliases}} {{.}}{{end}}{{printf "\n"}}{{end}}'
+HOSTS_FORMAT_DNS_NAMES='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{range .DNSNames}} {{.}}{{end}}{{printf "\n"}}{{end}}'
 
 set -e
 
@@ -18,6 +19,19 @@ show_usage() {
     echo "Add the IPs and hostnames of all containers started by docker-compose to ${HOSTSFILE}."
     echo
     echo "Usage: docker_hosts.sh [-f <hosts-file>] [-r]"
+}
+
+extract_names() {
+  CONTAINER=$1
+
+  # try to fetch DNSNames node first. Available since docker version 26.x
+  DNS_NAMES=$(docker inspect --format "${HOSTS_FORMAT_DNS_NAMES}" "${CONTAINER}" 2>/dev/null)
+  if [ -z "${DNS_NAMES}" ]; then
+    # get aliases node
+    docker inspect --format "${HOSTS_FORMAT_ALIAS}" "${CONTAINER}"
+  else
+     echo "${DNS_NAMES}"
+  fi
 }
 
 # check if there is an environment variable that sets a different docker registry
@@ -69,7 +83,7 @@ if [ "${ADD_HOSTS:-1}" = "1" ]; then
     # List all docker containers started by docker-compose
     docker-compose ps -q | while read -r container; do
         # Extract IP and hostnames from each container
-        docker inspect --format "${HOSTS_FORMAT}" "${container}";
+        extract_names "${container}";
     # remove empty lines and append all lines to the hosts-file
     done | awk "NF" | docker run --rm -i -v "${HOSTSFILE}":/tmp/h "${BUSYBOX}" tee -a /tmp/h
 fi
