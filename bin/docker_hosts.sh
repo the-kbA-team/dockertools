@@ -12,8 +12,6 @@ BUSYBOX="busybox:latest"
 HOSTS_FORMAT_ALIAS='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{range .Aliases}} {{.}}{{end}}{{printf "\n"}}{{end}}'
 HOSTS_FORMAT_DNS_NAMES='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{range .DNSNames}} {{.}}{{end}}{{printf "\n"}}{{end}}'
 
-set -e
-
 # display usage information
 show_usage() {
     echo "Add the IPs and hostnames of all containers started by docker-compose to ${HOSTSFILE}."
