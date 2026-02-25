@@ -33,7 +33,8 @@ Usage: `docker_hosts.sh [-h] [-f <hosts-file>] [-r]`
 
 ### Environment variables
 
-* `DOCKER_REGISTRY` Instead of using `busybox:latest` to manipulate the hosts file, `${DOCKER_REGISTRY}/busybox` will be used. This is useful, in case you manually cache docker images in a local registry for faster access.
+* `DOCKER_REGISTRY` Instead of using `busybox:latest` to manipulate the hosts file, `${DOCKER_REGISTRY}/busybox:latest` will be used. This is useful, in case you manually cache docker images in a local registry for faster access.
+* `BUSYBOX` Instead of using `busybox:latest` to manipulate the hosts file, use the docker image from the variable. This is useful, in case you manually cache docker images in a local registry for faster access or if you want to use a different busybox version.
 
 ## Automate docker-compose
 

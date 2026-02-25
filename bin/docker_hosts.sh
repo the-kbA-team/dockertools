@@ -8,7 +8,7 @@
 ################################################################################
 
 HOSTSFILE="/etc/hosts"
-BUSYBOX="busybox:latest"
+BUSYBOX="${BUSYBOX:-busybox:latest}"
 HOSTS_FORMAT_ALIAS='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{range .Aliases}} {{.}}{{end}}{{printf "\n"}}{{end}}'
 HOSTS_FORMAT_DNS_NAMES='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{range .DNSNames}} {{.}}{{end}}{{printf "\n"}}{{end}}'
 
